@@ -2,7 +2,6 @@ import json
 from django.http import JsonResponse
 import os
 import subprocess
-
 # Cloning the Repository into the local system
 def repo_cloning(git_repo_link: str) -> str:
     repo_file_path = os.path.basename(git_repo_link)
@@ -18,7 +17,7 @@ def read_dependencies(repo_path: str) -> str:
     dependencies_file = os.path.join(repo_path, "requirements.txt")
     depend_command = f"pipreqs {repo_path} --force --savepath {dependencies_file}"
     output = subprocess.check_output(depend_command, shell=True, stderr=subprocess.STDOUT)
-    
+ 
     # Reading requierements.txt file
     with open(dependencies_file, "r") as file:
         dependencies = file.read()
@@ -39,3 +38,4 @@ def get_dependencies(request):
         return JsonResponse({'output': output_dependencies})
     else:
         return JsonResponse({'error': 'No input provided'})
+    
