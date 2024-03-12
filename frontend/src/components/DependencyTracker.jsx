@@ -40,6 +40,7 @@ const DependencyTracker = () => {
                     value={dependencyOutput}
                     placeholder="Requirements"
                     onChange={handleDependencyOutput}
+                    readOnly={true}
                 />
             </div>
         </div>
