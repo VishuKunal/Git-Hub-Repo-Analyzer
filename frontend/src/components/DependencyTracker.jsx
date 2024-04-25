@@ -17,7 +17,10 @@ const DependencyTracker = () => {
         const response = await axios.post("http://127.0.0.1:8000/repoanalyze/get_dependencies/", {
             input: searchItem,
         });
-        console.log(response.data.output);
+        const outpt = response.data.output;
+        const outputWithSpaces = outpt.replace(/==/g, "  | Version =  ").split('\n').join('\n\n');
+        console.log(outputWithSpaces);
+
         setDependencyOutput(response.data.output);
     }
 
@@ -48,9 +51,3 @@ const DependencyTracker = () => {
 }
 
 export default DependencyTracker;
-
-
-
-
-
-

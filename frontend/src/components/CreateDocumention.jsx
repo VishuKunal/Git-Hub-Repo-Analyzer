@@ -124,12 +124,13 @@
 
 import { useState } from 'react';
 import axios from 'axios';
+import '../styles/CreateDocumentation.css';
 
 const CreateDocumentation = () => {
     const [searchItem, setSearchItem] = useState('');
     const [downloadLink, setDownloadLink] = useState('');
 
-    const handleSubmit = async (event) => {
+    const handleCreateDocumentSubmit = async (event) => {
         event.preventDefault();
         const response = await axios.post("http://127.0.0.1:8000/repoanalyze/genDocument_from_docstr/", {
             input: searchItem,
@@ -161,8 +162,8 @@ const CreateDocumentation = () => {
     }
 
     return (
-        <div>
-            <form onSubmit={handleSubmit}>
+            <div className="createDocument">
+            <form onSubmit={handleCreateDocumentSubmit}>
                 <input
                     type="text"
                     value={searchItem}
