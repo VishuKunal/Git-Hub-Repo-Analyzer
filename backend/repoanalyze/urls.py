@@ -9,4 +9,6 @@ urlpatterns = [
     # path('get_files_from_dir/', views.get_files_from_dir, name='get_files_from_dir'),
     path('generate_doc_strings/', views.generate_doc_strings, name='generate_doc_strings'),
     path('genDocument_from_docstr/', views.genDocument_from_docstr, name='genDocument_from_docstr'),
+    path('download_documentation/', views.download_documentation, name='download_documentation'),
+    path('remove_zip/', views.remove_zip, name='remove_zip'),
 ]

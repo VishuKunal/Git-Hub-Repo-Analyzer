@@ -1,186 +1,103 @@
-// import { useState } from 'react';
-// import axios from 'axios';
-
-// const CreateDocumentation = () => {
-//     const [searchItem, setSearchItem] = useState('');
-//     const [downloadLink, setDownloadLink] = useState('');
-
-//     const handleSubmit = async (event) => {
-//         event.preventDefault();
-//         const response = await axios.post("http://127.0.0.1:8000/repoanalyze/genDocument_from_docstr/", {
-//             input: searchItem,
-//         });
-//         // Update state with the download link
-//         setDownloadLink(response.data);
-//     }
-
-//     const handleSearchTextChange = (event) => {
-//         setSearchItem(event.target.value);
-//     }
-
-//     const handleDownload = async () => {
-//         // Download the documentation.zip file
-//         const response = await axios.get(downloadLink, {
-//             responseType: 'blob', // Important: specify the response type as blob
-//         });
-//         // Create a temporary anchor element to initiate download
-//         const url = window.URL.createObjectURL(new Blob([response.data]));
-//         const link = document.createElement('a');
-//         link.href = url;
-//         link.setAttribute('download', 'documentation.zip');
-//         document.body.appendChild(link);
-//         link.click();
-//         // Clean up
-//         link.parentNode.removeChild(link);
-//     }
-
-//     return (
-//         <div>
-//             <form onSubmit={handleSubmit}>
-//                 <input
-//                     type="text"
-//                     value={searchItem}
-//                     onChange={handleSearchTextChange}
-//                     placeholder='Enter the GitHub repository link here'
-//                 />
-//                 <button type='submit'>Submit</button>
-//             </form>
-
-//             {downloadLink && (
-//                 <div>
-//                     <p>Documentation generated! Click below to download:</p>
-//                     <button onClick={handleDownload}>Download Documentation</button>
-//                 </div>
-//             )}
-//         </div>
-//     );
-// }
-
-// export default CreateDocumentation;
-
-
-
-// import { useState } from 'react';
-// import axios from 'axios';
-
-// const CreateDocumentation = () => {
-//     const [searchItem, setSearchItem] = useState('');
-//     const [downloadLink, setDownloadLink] = useState('');
-
-//     const handleSubmit = async (event) => {
-//         event.preventDefault();
-//         const response = await axios.post("http://127.0.0.1:8000/repoanalyze/genDocument_from_docstr/", {
-//             input: searchItem,
-//         });
-//         const download_link = response.data.output;
-//         setDownloadLink(download_link);
-//     }
-
-//     const handleSearchTextChange = (event) => {
-//         setSearchItem(event.target.value);
-//     }
-
-//     const handleDownload = async () => {
-//         // Download the documentation.zip file
-//         const response = await axios.get(downloadLink, {
-//             responseType: 'blob', // Important: specify the response type as blob
-//         });
-//         // Create a temporary anchor element to initiate download
-//         const url = window.URL.createObjectURL(new Blob([response.data]));
-//         const link = document.createElement('a');
-//         link.href = url;
-//         link.setAttribute('download', 'documentation.zip');
-//         document.body.appendChild(link);
-//         link.click();
-//         // Clean up
-//         link.parentNode.removeChild(link);
-//     }
-
-//     return (
-//         <div>
-//             <form onSubmit={handleSubmit}>
-//                 <input
-//                     type="text"
-//                     value={searchItem}
-//                     onChange={handleSearchTextChange}
-//                     placeholder='Enter the GitHub repository link here'
-//                 />
-//                 <button type='submit'>Submit</button>
-//             </form>
-
-//             {downloadLink && (
-//                 <div>
-//                     <p>Documentation generated! Click below to download:</p>
-//                     <button onClick={handleDownload}>Download Documentation</button>
-//                 </div>
-//             )}
-//         </div>
-//     );
-// }
-
-// export default CreateDocumentation;
-
-
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
+import '../styles/CreateDocumention.css'
 
-const CreateDocumentation = () => {
-    const [searchItem, setSearchItem] = useState('');
-    const [downloadLink, setDownloadLink] = useState('');
+const DocumentationGen = () => {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [error, setError] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [zipFile, setZipFile] = useState(null);
+    const [isDownloading, setIsDownloading] = useState(false);
+    // const [isDownloaded, setIsDownloaded] = useState(false);
 
-    const handleSubmit = async (event) => {
+    const handleDocGeneration = async (event) => {
         event.preventDefault();
-        const response = await axios.post("http://127.0.0.1:8000/repoanalyze/genDocument_from_docstr/", {
-            input: searchItem,
-        });
-        // Extract the download link from the response data
-        const { output } = response.data;
-        // Update state with the download link
-        setDownloadLink(output);
+        setIsLoading(true);
+        setError(null);
+
+        try {
+            const response = await axios.post('http://127.0.0.1:8000/repoanalyze/genDocument_from_docstr/', {
+                input: searchTerm
+            })
+            const data = response.data.output;
+            if (response.status === 200) {
+                setZipFile(data);
+                setError(null);
+            } else {
+                setError('Failed to generate documentation. Please try again later!');
+                setZipFile(null);
+            }
+        } catch (error) {
+            setError('Failed to generate documentation. Please try again later!');
+            setZipFile(null);
+        } finally {
+            setIsLoading(false);
+        }
     }
 
-    const handleSearchTextChange = (event) => {
-        setSearchItem(event.target.value);
+    const downloadDocumentation = async () => {
+        console.log("Startinfg download!!");
+        setIsDownloading(true);
+        setError(null);
+        
+        try {
+            const response = await axios.post('http://127.0.0.1:8000/repoanalyze/download_documentation/', {
+                input: zipFile
+            }, {
+                responseType: 'blob'
+            })
+            const blob = response.data;
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'documentation.zip');
+            link.click();
+        } catch (error) {
+            setError('Failed to download the documentatoin. Please try again later!');
+        } finally {
+            setIsDownloading(false);
+            // setIsDownloaded(true);
+        }
     }
 
-    const handleDownload = async () => {
-        // Download the documentation.zip file
-        const response = await axios.get(downloadLink, {
-            responseType: 'blob', // Important: specify the response type as blob
-        });
-        // Create a temporary anchor element to initiate download
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', 'documentation.zip');
-        document.body.appendChild(link);
-        link.click();
-        // Clean up
-        link.parentNode.removeChild(link);
-    }
+    // useEffect(() => {
+    //     const removeFromBackend = async () => {
+    //         if (zipFile && isDownloaded) {
+    //             try {
+    //                 const response = await axios.post('http://127.0.0.1:8000/repoanalyze/remove_zip/', {
+    //                     input: zipFile
+    //                 })
+    //                 if (response.status === 200) {
+    //                     console.log(`Zip file removed from backend: ${zipFile}`);
+    //                 }
+    //             } catch (error) {
+    //                 console.log(`Error while removing zip file: ${error}`);
+    //             }
+    //         }
+    //     }
+
+    //     removeFromBackend();
+    // }, [isDownloaded, zipFile])
 
     return (
-        <div>
-            <form onSubmit={handleSubmit}>
+        <main className='createDocument'>
+            <form onSubmit={handleDocGeneration}>
                 <input
                     type="text"
-                    value={searchItem}
-                    onChange={handleSearchTextChange}
-                    placeholder='Enter the GitHub repository link here'
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                    placeholder='Enter the repo url to generate documentation'
                 />
-                <button type='submit'>Submit</button>
+                <button disabled={isLoading}>{isLoading ? 'Loading...' : "Generate Documentation"}</button>
             </form>
 
-            {downloadLink && (
-                <div>
-                    <p>Documentation generated! Click below to download:</p>
-                    <button onClick={handleDownload}>Download Documentation</button>
-                </div>
-            )}
-        </div>
+            {zipFile &&
+                <button onClick={downloadDocumentation} disabled={isDownloading}>{isDownloading ? "Downloading..." : "Download Documentation"}</button>
+            }
+
+            {error && <p className='error-message'>{error}</p>}
+        </main>
     );
 }
 
-export default CreateDocumentation;
-
+export default DocumentationGen;

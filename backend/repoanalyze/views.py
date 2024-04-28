@@ -1,17 +1,12 @@
 from django.shortcuts import render
 import json
 import base64
-from django.http import JsonResponse
-
-
+from django.http import JsonResponse, HttpResponse
 import os
 import requests
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
-
-
-
 import subprocess
 from github import Github
 import shutil
@@ -23,6 +18,7 @@ load_dotenv()
 
 gemni_api_key = os.getenv("GEMNI_API_KEY")
 genai.configure(api_key=gemni_api_key)
+
 
 # Set up the model
 generation_config = {
@@ -74,7 +70,7 @@ def repo_cloning(git_repo_link: str, branch: str = "main") -> str:
     # Checking if the repo already exists at the desired place
     if os.path.exists(repo_file_path):
         return os.path.abspath(repo_file_path)
-    subprocess.check_call(['git', 'clone', '-b', f'{branch}', f'{git_repo_link}', repo_file_path])
+    subprocess.check_call(['git', 'clone', '--branch', f'{branch}', f'{git_repo_link}', repo_file_path])
     return os.path.abspath(repo_file_path)
 
 # Reading the requirements file
@@ -205,7 +201,7 @@ def get_files_from_repository(request):
             file_url = input_text + "/blob/main/" + file["path"]
             file_names.append(file_url)
         elif (file["type"] == "dir"):
-            # get_files_from_dir(input_text, file["path"], file_names)
+            get_files_from_dir(input_text, file["path"], file_names)
             pass
     print_array(file_names) # To display the files fetched
     return JsonResponse({'output': file_names})
@@ -585,12 +581,12 @@ def genDocument_from_docstr(request):
 
     # Initializing Sphinx project
     if not os.path.exists("docs"):
-        subprocess.run(["sphinx-quickstart", "--quiet", f"--project={repo_path}", "--author=DocGenerator"])
+        subprocess.run(["sphinx-quickstart", "--quiet", f"--project=DocGenTool", "--author=DocGenerator"])
     
     os.chdir("..")
 
-    # if not os.path.exists("_init_.py"):
-    #     with open("_init_.py", "w") as f:
+    # if not os.path.exists("__init__.py"):
+    #     with open("__init__.py", "w") as f:
     #         f.write("")
 
     # Generate API documentation
@@ -614,7 +610,7 @@ def genDocument_from_docstr(request):
     # Modify the contents
     for i, line in enumerate(lines):
         if "# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information" in line:
-            lines[i] = "# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information \n\nimport os\nimport sys\nsys.path.insert(0, os.path.abspath('...'))\n"
+            lines[i] = '# https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information \n\nimport os\nimport sys\nsys.path.insert(0, os.path.abspath(".."))\n'
         if "html_theme = 'alabaster'" in line:
             lines[i] = "\nhtml_theme = 'sphinx_rtd_theme'\n"
         if "extensions = []" in line:
@@ -628,15 +624,62 @@ def genDocument_from_docstr(request):
 
     # Build the documentation
     # subprocess.run(['sphinx-build', '-b', 'html', 'docs', 'docs/_build'])
-    subprocess.run(['.\make.bat', 'html'])
-    os.chdir("..")
+    subprocess.run(['make.bat', 'html'])
+    os.chdir("../..")
+    repo_name = list(repo_path.split("/"))[-1]
 
     # Create a zip file of the documentation generated
-    shutil.make_archive('documentation', 'zip', 'docs')
+    shutil.make_archive('documentation', 'zip', f'{repo_name}')
 
-    return JsonResponse({'output' : os.path.abspath('documentation.zip')})
+    path_to_return = os.path.abspath('documentation.zip')
+    path_to_return = path_to_return.replace("\\", '/')
+
+    return JsonResponse({'output' : path_to_return})
     # Move the generated HTML files to the output directory
     # subprocess.run(["mv", "build/html", '../output_dir'])
+
+# Downloading the generated documentation
+def download_documentation(request):
+    print("Coming here 1")
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST request required'})
+    print("Coming here 2")
+    try:
+        req = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON request body'})
+    print("Coming here 3")
+    zip_file_link = req["input"]
+    if zip_file_link is None:
+        return JsonResponse({'error': 'No input provided'})
+    
+    print("The path got of documentation is: ", zip_file_link)
+    
+    with open(zip_file_link, 'rb') as zip_file:
+        response = HttpResponse(zip_file.read(), content_type='application/zip')
+        response['Content-Disposition'] = 'attachment; filename=documentation.zip'
+        return response
+
+# -----------------------------------------------------------------------------------------------------------------
+# Removing the zip file
+def remove_zip(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST request required'})
+    try:
+        req = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON request body'})
+    zip_file_link = req["input"]
+    if zip_file_link is None:
+        return JsonResponse({'error': 'No input provided'})
+    
+    path_to_remove = list(zip_file_link.split('/'))[:-1]
+    path_to_remove = "/".join(path_to_remove)
+
+    # Removing the desired folder
+    os.remove(path_to_remove)
+    return JsonResponse({'output': 'Zip file removed successfully!'})
+
 
 # -----------------------------------------------------------------------------------------------------------------
 # Utils
@@ -644,3 +687,8 @@ def print_array(array):
     print("The files fetched are:")
     for i in array:
         print(i,",")
+
+
+
+
+
