@@ -7,7 +7,7 @@ Introducing GitHub Repo Analyzer, your one-stop shop for analyzing and documenti
 
 This powerful tool empowers you to delve into the inner workings of your code, making it easier than ever to either finding the dependencies used, tracking commit history or generating documentation for your code to make easily readable.
 
-## 📝 Table of Contents
+## 📝 Contents
 
 1. [Overview](#overview)
 2. [Features](#features)
