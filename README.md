@@ -114,20 +114,22 @@ The tool basically contains four section:
 
 1. <strong>Dependency Tracker</strong>
 
-   ![image](https://github.com/prakharmosesOK/Repository-Analyzing-Tool/assets/142619454/5c6fb662-1262-40b3-9025-3217086be0f7)
+   ![image](https://github.com/user-attachments/assets/36ff0855-1ee7-4efd-a88c-85b14b1eb396)
+
 
    The use have to enter the Repository link and the branch for which the dependencies are to be fetched.
    By default, tool finds the dependencies of the main branch.
 
 2. <strong>Version Control</strong>
 
-   ![image](https://github.com/prakharmosesOK/Repository-Analyzing-Tool/assets/142619454/69117807-3c17-4026-9fba-c65e81479d04)
+   ![image](https://github.com/user-attachments/assets/4560a2b7-6e36-41f9-bec3-29cf3e1dd517)
 
    The users are required to enter the repo link in the space provided. It fetches all the commit history and version control for the given repository link.
 
 3. <strong>Comments/DocStrings Generator</strong>
 
-   ![image](https://github.com/prakharmosesOK/Repository-Analyzing-Tool/assets/142619454/3c84e5e3-c4b9-41d7-a3e4-8a92e935c77a)
+   ![image](https://github.com/user-attachments/assets/6b45d524-d71e-4810-814f-3093468ac262)
+
 
 <ul>
    <li>The user is required to enter the Repository link for which the DocStrings need to be generated.</li>
@@ -137,7 +139,8 @@ The tool basically contains four section:
 
 4. <strong>Documentation Generator</strong>
 
-   ![image](https://github.com/prakharmosesOK/Repository-Analyzing-Tool/assets/142619454/467b6968-58a1-434f-9b6f-e9037b258680)
+   ![image](https://github.com/user-attachments/assets/100de9c8-ff51-4e24-b252-daf4402aaf7e)
+
 
 <ul>
    <li>The user has to enter the repository link for which the documentation is to be generated.</li>
