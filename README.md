@@ -56,7 +56,7 @@ Follow these steps to set up the GitHub-Repo-Analyzer on your system:
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/prakharmosesOK/Repository-Analyzing-Tool
+    git clone https://github.com/VishuKunal/Git-Hub-Repo-Analyzer.git
     ```
 
 2. Open two terminals, one for frontend and another for backend.
